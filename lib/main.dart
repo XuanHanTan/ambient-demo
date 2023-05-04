@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(MainPage());
+  runApp(MaterialApp(home: MainPage()));
 }
 
 class MainPage extends StatefulWidget {
@@ -50,7 +50,27 @@ class MainPageState extends State<MainPage> {
               timerInf = null;
               autoOffEnabled = false;
             });
-            Firestore.instance
+
+            // DEMO: Hardware-interfacing code has been replaced with simulation code
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.setBool("autoOff", false);
+            prefs.setInt("offHour", null);
+            prefs.setInt("offMinute", null);
+            prefs.setInt("offYear", null);
+            prefs.setInt("offMonth", null);
+            prefs.setInt("offDay", null);
+            colorTweenG1 = ColorTween(
+                    begin: colorTweenG1.value,
+                    end: isOff
+                        ? Colors.grey[400]
+                        : cprefs < 20
+                            ? Colors.blue[100]
+                            : Colors.greenAccent)
+                .animate(colorControllerG1);
+            prefs.setBool("isOffMaster", isOffMaster);
+            prefs.setBool("isOff", isOff);
+
+            /*Firestore.instance
                 .collection("demo")
                 .document("control")
                 .get()
@@ -117,12 +137,13 @@ class MainPageState extends State<MainPage> {
                     .document("stats")
                     .updateData({"ts": tsList2});
               });
-            });
+            });*/
           }
           break;
         default:
           print("Default fetch task");
-          Firestore.instance
+
+        /*Firestore.instance
               .collection("demo")
               .document("prefs")
               .get()
@@ -451,7 +472,7 @@ class MainPageState extends State<MainPage> {
                 });
               }
             }
-          });
+          });*/
 
         // IMPORTANT:  You must signal completion of your task or the OS can punish your app
         // for taking too long in the background.
@@ -478,6 +499,11 @@ class MainPageState extends State<MainPage> {
     setState(() {
       top = prefs.getInt("top") ?? 35;
       bottom = prefs.getInt("bottom") ?? 10;
+
+      // DEMO: Hardware-interfacing code has been replaced with simulation code
+      maxtemp = top;
+      mintemp = bottom;
+      cprefs = prefs.getInt("cprefs") ?? 23;
     });
     print(top);
     print(bottom);
@@ -498,11 +524,39 @@ class MainPageState extends State<MainPage> {
       isOffMaster = prefs.getBool("isOffMaster") ?? false;
     });
     print(preftemp);
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChkLogIn ? HomePage() : Setup1(),
+      ),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return MaterialApp(home: ChkLogIn ? HomePage() : Setup1());
+    return MaterialApp(
+      home: Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Center(
+              child: Image.asset(
+                "assets/ambient.png",
+                width: 200,
+                height: 200,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            CircularProgressIndicator()
+          ],
+        ),
+      ),
+    );
   }
 }

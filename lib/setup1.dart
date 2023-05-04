@@ -23,19 +23,17 @@ var comingFromFinishSU = false;
 BuildContext context2;
 TextEditingController controller3;
 StreamSubscription<DocumentSnapshot> streamSub;
-  PageController controller;
+PageController controller;
 
 class Setup1State extends State<Setup1> with WidgetsBindingObserver {
-  
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     setState(() {
-      controller = PageController(initialPage: comingFromFinishSU ? 2: 0);
+      controller = PageController(initialPage: comingFromFinishSU ? 2 : 0);
     });
     WidgetsBinding.instance.addObserver(this);
-    
   }
 
   @override
@@ -65,24 +63,25 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                       Colors.blueAccent[400],
                     ])),
               )),
-          Column(children: [
-            Container(height: 30),
-            Expanded(child: PageView(
-              
-            controller: controller,
-            physics: new NeverScrollableScrollPhysics(),
+          Column(
             children: [
-         setup1(),
-               setup2(),
-              setup3(),
-              setup3_2(),
-              setup4(),
-              setup5(),
-              setup6(),
-              setup7(context1)
-            ]
-          ))
-          ],)
+              Container(height: 30),
+              Expanded(
+                  child: PageView(
+                      controller: controller,
+                      physics: new NeverScrollableScrollPhysics(),
+                      children: [
+                    setup1(),
+                    setup2(),
+                    setup3(),
+                    setup3_2(),
+                    setup4(),
+                    setup5(),
+                    setup6(),
+                    setup7(context1)
+                  ]))
+            ],
+          )
         ])));
   }
 
@@ -135,17 +134,19 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                         style: TextStyle(fontSize: 16),
                       ),
                       Container(height: 100),
-                      TextField(
-                          controller: controller3,
-                          onChanged: (serial) {
-                            setState(() {
-                              sr1 = serial;
-                            });
-                          },
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: "Serial number",
-                          ))
+                      TextFormField(
+                        controller: controller3,
+                        onChanged: (serial) {
+                          setState(() {
+                            sr1 = serial;
+                          });
+                        },
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: "Serial number",
+                        ),
+                        initialValue: "1234",
+                      )
                     ],
                   )),
               alignment: Alignment.bottomCenter,
@@ -243,7 +244,7 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             ? Colors.grey[800]
                             : Colors.white,
                     onPressed: () {
-                      Firestore.instance
+                      /*Firestore.instance
                           .collection("demo")
                           .document("control")
                           .updateData({
@@ -269,6 +270,13 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             .document("control")
                             .updateData({
                           "signalReceived": false,
+                        });
+                      });*/
+
+                      // DEMO: Hardware-interfacing code has been replaced with simulation code
+                      Future.delayed(Duration(seconds: 2), () {
+                        setState(() {
+                          confPowerComplete = true;
                         });
                       });
 
@@ -416,7 +424,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             setState(() {
                               confPowerComplete = false;
                             });
-                            Firestore.instance
+
+                            /*Firestore.instance
                                 .collection("demo")
                                 .document("control")
                                 .updateData({
@@ -443,7 +452,15 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                   .updateData({
                                 "signalReceived": false,
                               });
+                            });*/
+
+                            // DEMO: Hardware-interfacing code has been replaced with simulation code
+                            Future.delayed(Duration(seconds: 2), () {
+                              setState(() {
+                                confPowerComplete = true;
+                              });
                             });
+
                             controller.animateToPage(3,
                                 duration: Duration(milliseconds: 300),
                                 curve: Curves.ease);
@@ -459,48 +476,51 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                     alignment: Alignment.bottomRight,
                   )
                 : Container(),
-            !comingFromFinishSU ?  Align(
-              child: Padding(
-                  child: FloatingActionButton.extended(
-                    elevation: 0.0,
-                    backgroundColor:
-                        WidgetsBinding.instance.window.platformBrightness ==
-                                Brightness.dark
-                            ? Colors.grey[800]
-                            : Colors.white,
-                    onPressed: () {
-                      setState(() {
-                        confPowerComplete = false;
-                        sr1 = "";
-                      });
-                      streamSub.cancel();
+            !comingFromFinishSU
+                ? Align(
+                    child: Padding(
+                        child: FloatingActionButton.extended(
+                          elevation: 0.0,
+                          backgroundColor: WidgetsBinding
+                                      .instance.window.platformBrightness ==
+                                  Brightness.dark
+                              ? Colors.grey[800]
+                              : Colors.white,
+                          onPressed: () {
+                            setState(() {
+                              confPowerComplete = false;
+                              sr1 = "";
+                            });
 
-                      controller.animateToPage(1,
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.ease);
-                    },
-                    label: Text(
-                      "Back",
-                      style: TextStyle(
-                        color:
-                            WidgetsBinding.instance.window.platformBrightness ==
+                            // streamSub.cancel();
+
+                            controller.animateToPage(1,
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.ease);
+                          },
+                          label: Text(
+                            "Back",
+                            style: TextStyle(
+                              color: WidgetsBinding
+                                          .instance.window.platformBrightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black54,
+                            ),
+                          ),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: WidgetsBinding
+                                        .instance.window.platformBrightness ==
                                     Brightness.dark
                                 ? Colors.white
                                 : Colors.black54,
-                      ),
-                    ),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color:
-                          WidgetsBinding.instance.window.platformBrightness ==
-                                  Brightness.dark
-                              ? Colors.white
-                              : Colors.black54,
-                    ),
-                  ),
-                  padding: EdgeInsets.fromLTRB(15, 0, 0, 15)),
-              alignment: Alignment.bottomLeft,
-            ): Container()
+                          ),
+                        ),
+                        padding: EdgeInsets.fromLTRB(15, 0, 0, 15)),
+                    alignment: Alignment.bottomLeft,
+                  )
+                : Container()
           ],
         ));
   }
@@ -593,7 +613,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             setState(() {
                               confPowerComplete = false;
                             });
-                            Firestore.instance
+
+                            /*Firestore.instance
                                 .collection("demo")
                                 .document("control")
                                 .updateData({
@@ -620,7 +641,15 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                   .updateData({
                                 "signalReceived": false,
                               });
+                            });*/
+
+                            // DEMO: Hardware-interfacing code has been replaced with simulation code
+                            Future.delayed(Duration(seconds: 2), () {
+                              setState(() {
+                                confPowerComplete = true;
+                              });
                             });
+
                             controller.animateToPage(4,
                                 duration: Duration(milliseconds: 300),
                                 curve: Curves.ease);
@@ -647,10 +676,11 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             : Colors.white,
                     onPressed: () {
                       setState(() {
-                        confPowerComplete = false;
+                        confPowerComplete = true;
                         sr1 = "";
                       });
-                      streamSub.cancel();
+
+                      /*streamSub.cancel();
                       Firestore.instance
                           .collection("demo")
                           .document("control")
@@ -679,7 +709,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             .updateData({
                           "signalReceived": false,
                         });
-                      });
+                      });*/
+
                       controller.animateToPage(2,
                           duration: Duration(milliseconds: 300),
                           curve: Curves.ease);
@@ -798,7 +829,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             setState(() {
                               confPowerComplete = false;
                             });
-                            Firestore.instance
+
+                            /*Firestore.instance
                                 .collection("demo")
                                 .document("control")
                                 .updateData({
@@ -825,7 +857,15 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                   .updateData({
                                 "signalReceived": false,
                               });
+                            });*/
+
+                            // DEMO: Hardware-interfacing code has been replaced with simulation code
+                            Future.delayed(Duration(seconds: 2), () {
+                              setState(() {
+                                confPowerComplete = true;
+                              });
                             });
+
                             controller.animateToPage(5,
                                 duration: Duration(milliseconds: 300),
                                 curve: Curves.ease);
@@ -852,10 +892,11 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                               : Colors.white,
                       onPressed: () {
                         setState(() {
-                          confPowerComplete = false;
+                          confPowerComplete = true;
                           sr1 = "";
                         });
-                        streamSub.cancel();
+
+                        /*streamSub.cancel();
                         setState(() {
                           confPowerComplete = false;
                         });
@@ -887,7 +928,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                               .updateData({
                             "signalReceived": false,
                           });
-                        });
+                        });*/
+
                         controller.animateToPage(3,
                             duration: Duration(milliseconds: 300),
                             curve: Curves.ease);
@@ -1004,8 +1046,11 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                           onPressed: () {
                             setState(() {
                               confPowerComplete = false;
+                              isOff = true;
                             });
-                            streamSub.cancel();
+
+                            //streamSub.cancel();
+
                             controller.animateToPage(6,
                                 duration: Duration(milliseconds: 300),
                                 curve: Curves.ease);
@@ -1032,10 +1077,11 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             : Colors.white,
                     onPressed: () {
                       setState(() {
-                        confPowerComplete = false;
+                        confPowerComplete = true;
                         sr1 = "";
                       });
-                      streamSub.cancel();
+
+                      /*streamSub.cancel();
                       Firestore.instance
                           .collection("demo")
                           .document("control")
@@ -1064,7 +1110,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             .updateData({
                           "signalReceived": false,
                         });
-                      });
+                      });*/
+
                       controller.animateToPage(4,
                           duration: Duration(milliseconds: 300),
                           curve: Curves.ease);
@@ -1155,7 +1202,7 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                 : Colors.redAccent,
                         icon: Icon(Icons.power_settings_new, size: 200 * scale),
                         onPressed: () {
-                          Firestore.instance
+                          /*Firestore.instance
                               .collection("demo")
                               .document("control")
                               .get()
@@ -1210,6 +1257,12 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                   .document("stats")
                                   .updateData({"ts": tsList2});
                             });
+                          });*/
+
+                          // DEMO: Hardware-interfacing code has been replaced with simulation code
+                          setState(() {
+                            isOff = !isOff;
+                            isOffMaster = !isOffMaster;
                           });
                         },
                       ),
@@ -1255,10 +1308,11 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             : Colors.white,
                     onPressed: () {
                       setState(() {
-                        confPowerComplete = false;
+                        confPowerComplete = true;
                         sr1 = "";
                       });
-                      streamSub.cancel();
+
+                      /*streamSub.cancel();
                       Firestore.instance
                           .collection("demo")
                           .document("control")
@@ -1288,7 +1342,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             .updateData({
                           "signalReceived": false,
                         });
-                      });
+                      });*/
+
                       controller.animateToPage(5,
                           duration: Duration(milliseconds: 300),
                           curve: Curves.ease);
@@ -1539,15 +1594,22 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                                   style:
                                                       TextStyle(fontSize: 18),
                                                 ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    if (cprefs > top) {
-                                                      cprefs = top;
-                                                    }
-                                                    top = maxtemp1;
-                                                  });
+                                                onPressed: () async {
+                                                  // DEMO: Hardware-interfacing code has been replaced with simulation code
+                                                  final prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
+                                                  if (cprefs > top) {
+                                                    cprefs = top;
+                                                  }
+                                                  top = maxtemp1;
+
+                                                  setState(() {});
 
                                                   Navigator.pop(context);
+
+                                                  await prefs.setInt(
+                                                      "cprefs", cprefs);
                                                 },
                                               ),
                                             ],
@@ -1657,14 +1719,22 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                                   style:
                                                       TextStyle(fontSize: 18),
                                                 ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    if (cprefs < mintemp1) {
-                                                      cprefs = mintemp1;
-                                                    }
-                                                    bottom = mintemp1;
-                                                  });
+                                                onPressed: () async {
+                                                  // DEMO: Hardware-interfacing code has been replaced with simulation code
+                                                  final prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
+                                                  if (cprefs < mintemp1) {
+                                                    cprefs = mintemp1;
+                                                  }
+                                                  bottom = mintemp1;
+
+                                                  setState(() {});
+
                                                   Navigator.pop(context);
+
+                                                  await prefs.setInt(
+                                                      "cprefs", cprefs);
                                                 },
                                               ),
                                             ],
@@ -1717,10 +1787,9 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                                         : Colors.redAccent,
                                                     activeTickMarkColor:
                                                         cprefs1 < 28
-                                                            ? cprefs1 <
-                                                                    20
-                                                                ? Colors.blue[
-                                                                    300]
+                                                            ? cprefs1 < 20
+                                                                ? Colors
+                                                                    .blue[300]
                                                                 : Colors
                                                                     .green[300]
                                                             : Colors.redAccent,
@@ -1774,11 +1843,19 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                                                   style:
                                                       TextStyle(fontSize: 18),
                                                 ),
-                                                onPressed: () {
+                                                onPressed: () async {
+                                                  // DEMO: Hardware-interfacing code has been replaced with simulation code
+                                                  final prefs =
+                                                      await SharedPreferences
+                                                          .getInstance();
+
                                                   setState(() {
                                                     cprefs = cprefs1;
                                                   });
+
                                                   Navigator.pop(context);
+                                                  await prefs.setInt(
+                                                      "cprefs", cprefs);
                                                 },
                                               ),
                                             ],
@@ -1806,7 +1883,7 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             ? Colors.grey[800]
                             : Colors.white,
                     onPressed: () async {
-                      Firestore.instance
+                      /*Firestore.instance
                           .collection("demo")
                           .document("prefs")
                           .updateData({
@@ -1816,19 +1893,21 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                         "prefs": cprefs,
                         "max": top,
                         "min": bottom
-                      });
+                      });*/
+
                       SharedPreferences prefs =
                           await SharedPreferences.getInstance();
                       prefs.setInt("top", top);
                       prefs.setInt("bottom", bottom);
-                      if (!comingFromFinishSU){
+                      if (!comingFromFinishSU) {
                         prefs.setBool("login", true);
                       } else {
                         setState(() {
                           comingFromFinishSU = false;
                         });
                       }
-                      Firestore.instance
+
+                      /*Firestore.instance
                           .collection("demo")
                           .document("stats")
                           .get()
@@ -1848,7 +1927,8 @@ class Setup1State extends State<Setup1> with WidgetsBindingObserver {
                             .collection("demo")
                             .document("stats")
                             .updateData({"ts": tsList2});
-                      });
+                      });*/
+
                       setState(() {
                         ChkLogIn = true;
                       });

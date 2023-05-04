@@ -25,9 +25,9 @@ class HomePage extends StatefulWidget {
   }
 }
 
-var ctemp = "0.0";
+var ctemp = "25.0";
 var oldtemp = 0;
-var cprefs = 10;
+var cprefs = 23;
 var maxtemp = 35;
 var mintemp = 10;
 var preftemp;
@@ -360,7 +360,9 @@ class HomePageState extends State<HomePage>
                   begin: colorTweenG1.value,
                   end: isOff
                       ? Colors.grey[400]
-                      : cprefs < 20 ? Colors.blue[100] : Colors.greenAccent)
+                      : cprefs < 20
+                          ? Colors.blue[100]
+                          : Colors.greenAccent)
               .animate(colorControllerG1);
           prefs.setBool("isOff", isOff);
           Firestore.instance
@@ -547,7 +549,11 @@ class HomePageState extends State<HomePage>
       ..addListener(() {
         setState(() {});
       });
-    Firestore.instance.collection("demo").document("prefs").get().then((value) {
+
+    // DEMO: Hardware-interfacing code has been replaced with simulation code
+    adjustTempAnimate();
+
+    /*Firestore.instance.collection("demo").document("prefs").get().then((value) {
       setState(() {
         Dynamic = value["isDynamic"] ?? false;
         maxtemp = value["max"] ?? 35;
@@ -558,6 +564,7 @@ class HomePageState extends State<HomePage>
     });
 
     statlistener2(currentSelection);
+
     Firestore.instance
         .collection("demo")
         .document("prefs")
@@ -621,6 +628,7 @@ class HomePageState extends State<HomePage>
         oldtemp = value["prefs"];
       });
     });
+
     Firestore.instance
         .collection("demo")
         .document("temp")
@@ -629,6 +637,58 @@ class HomePageState extends State<HomePage>
       setState(() {
         ctemp = event["current"];
       });
+    });*/
+  }
+
+  void adjustTempAnimate() {
+    progressController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
+    animation = Tween<double>(
+            begin: animation.value,
+            end: ((cprefs - bottom) / (top - bottom)) * 100)
+        .animate(progressController)
+          ..addListener(() {
+            setState(() {});
+          });
+    colorControllerG1 = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
+    progressController.forward();
+    if (cprefs > oldtemp && cprefs >= 28 && oldtemp <= 28) {
+      colorTweenG1 = ColorTween(begin: Colors.greenAccent, end: Colors.red[300])
+          .animate(colorControllerG1);
+    } else if (cprefs < oldtemp && cprefs < 28 && oldtemp >= 28) {
+      print("$cprefs $oldtemp");
+
+      colorTweenG1 = ColorTween(begin: Colors.red[300], end: Colors.greenAccent)
+          .animate(colorControllerG1);
+    } else if (cprefs < oldtemp && cprefs < 20 && oldtemp >= 20) {
+      print("1");
+
+      colorTweenG1 =
+          ColorTween(begin: Colors.greenAccent, end: Colors.blue[100])
+              .animate(colorControllerG1);
+    } else if (cprefs < oldtemp && cprefs < 20 && oldtemp < 20) {
+      print("1");
+
+      colorTweenG1 = ColorTween(begin: Colors.blue[100], end: Colors.blue[100])
+          .animate(colorControllerG1);
+    } else if (cprefs > oldtemp && cprefs < 20) {
+      colorTweenG1 = ColorTween(begin: Colors.blue[100], end: Colors.blue[100])
+          .animate(colorControllerG1);
+    } else if (cprefs > oldtemp && oldtemp < 20) {
+      colorTweenG1 =
+          ColorTween(begin: Colors.blue[100], end: Colors.greenAccent)
+              .animate(colorControllerG1);
+      print('hot');
+    }
+
+    colorControllerG1.forward();
+
+    print(oldtemp);
+    print(cprefs);
+
+    setState(() {
+      oldtemp = cprefs;
     });
   }
 
@@ -767,10 +827,10 @@ class HomePageState extends State<HomePage>
                         var temporaryTemp =
                             (((ncprefs / 100) * (top - bottom)) + bottom)
                                 .toInt();
-                        Firestore.instance
+                        /*Firestore.instance
                             .collection("demo")
                             .document("prefs")
-                            .updateData({"prev": temporaryTemp});
+                            .updateData({"prev": temporaryTemp});*/
                       },
                       onChangeEnd: (ncprefs) async {
                         var temporaryTemp =
@@ -780,7 +840,7 @@ class HomePageState extends State<HomePage>
                         if (temporaryTemp <= top) {
                           print("$temporaryTemp temp");
 
-                          Firestore.instance
+                          /*Firestore.instance
                               .collection("demo")
                               .document("prefs")
                               .updateData({"prefs": temporaryTemp});
@@ -789,13 +849,13 @@ class HomePageState extends State<HomePage>
                               .document("control")
                               .updateData({
                             "adj": true,
-                          });
+                          });*/
                           if (isOff) {
                             setState(() {
                               isOff = false;
                               isOffMaster = false;
                             });
-                            Firestore.instance
+                            /*Firestore.instance
                                 .collection("demo")
                                 .document("prefs")
                                 .updateData(
@@ -806,7 +866,7 @@ class HomePageState extends State<HomePage>
                                 .updateData({
                               "poweron": true,
                               "poweroff": false,
-                            });
+                            });*/
 
                             SharedPreferences prefs =
                                 await SharedPreferences.getInstance();
@@ -820,7 +880,8 @@ class HomePageState extends State<HomePage>
                                 .animate(colorControllerG1);
                             prefs.setBool("isOff", isOff);
                             prefs.setBool("isOffMaster", isOffMaster);
-                            Firestore.instance
+
+                            /*Firestore.instance
                                 .collection("demo")
                                 .document("stats")
                                 .get()
@@ -840,14 +901,16 @@ class HomePageState extends State<HomePage>
                                   .collection("demo")
                                   .document("stats")
                                   .updateData({"ts": tsList2});
-                            });
+                            });*/
                           }
                         }
                       },
-                      onChanged: (ncprefs) {
+                      onChanged: (ncprefs) async {
                         var temporaryTemp =
                             (((ncprefs / 100) * (top - bottom)) + bottom)
                                 .toInt();
+                        final prefs = await SharedPreferences.getInstance();
+
                         if (temporaryTemp == (maxtemp + 1) &&
                             temporaryTemp > oldtemp) {
                           showDialog(
@@ -882,11 +945,15 @@ class HomePageState extends State<HomePage>
                                                 "Continue",
                                                 style: TextStyle(fontSize: 18),
                                               ),
-                                              onPressed: () {
+                                              onPressed: () async {
+                                                // DEMO: Hardware-interfacing code has been replaced with simulation code
                                                 setState(() {
                                                   cprefs = temporaryTemp;
                                                 });
+                                                adjustTempAnimate();
                                                 Navigator.pop(context);
+                                                await prefs.setInt(
+                                                    "cprefs", cprefs);
                                               },
                                             ),
                                           ],
@@ -930,11 +997,15 @@ class HomePageState extends State<HomePage>
                                                 "Continue",
                                                 style: TextStyle(fontSize: 18),
                                               ),
-                                              onPressed: () {
+                                              onPressed: () async {
+                                                // DEMO: Hardware-interfacing code has been replaced with simulation code
                                                 setState(() {
                                                   cprefs = temporaryTemp;
                                                 });
+                                                adjustTempAnimate();
                                                 Navigator.pop(context);
+                                                await prefs.setInt(
+                                                    "cprefs", cprefs);
                                               },
                                             ),
                                           ],
@@ -945,9 +1016,12 @@ class HomePageState extends State<HomePage>
                                 );
                               });
                         } else {
+                          // DEMO: Hardware-interfacing code has been replaced with simulation code
                           setState(() {
                             cprefs = temporaryTemp;
                           });
+                          adjustTempAnimate();
+                          await prefs.setInt("cprefs", cprefs);
                         }
                       },
                       label: "$cprefs°C",
@@ -1000,12 +1074,14 @@ class HomePageState extends State<HomePage>
                             prefs.setBool("isDynamic", Dynamic);
                             prefs.setInt("preftemp", preftemp);
                           }
-                          Firestore.instance
+
+                          /*Firestore.instance
                               .collection("demo")
                               .document("prefs")
                               .updateData(
                                   {"isDynamic": Dynamic, "preferred": cprefs});
-                          dynamicTemp();
+
+                          dynamicTemp();*/
                         }),
                     onLongPress: () {
                       var preftemp1 = preftemp;
@@ -1090,18 +1166,18 @@ class HomePageState extends State<HomePage>
                                                 SharedPreferences prefs =
                                                     await SharedPreferences
                                                         .getInstance();
-                                                Firestore.instance
+                                                /*Firestore.instance
                                                     .collection("demo")
                                                     .document("prefs")
                                                     .updateData({
                                                   "preferred": preftemp1
-                                                });
+                                                });*/
                                                 setState(() {
                                                   preftemp = temporaryTemp;
                                                 });
                                                 prefs.setInt(
                                                     "preftemp", preftemp);
-                                                dynamicTemp();
+                                                // dynamicTemp();
                                               }
                                               Navigator.pop(context);
                                             },
@@ -1270,11 +1346,13 @@ class HomePageState extends State<HomePage>
                     color: isOff
                         ? Colors.grey[600]
                         : cprefs < 28
-                            ? cprefs < 20 ? Colors.blue[300] : Colors.green[300]
+                            ? cprefs < 20
+                                ? Colors.blue[300]
+                                : Colors.green[300]
                             : Colors.redAccent,
                     icon: Icon(Icons.power_settings_new, size: 50),
-                    onPressed: () {
-                      Firestore.instance
+                    onPressed: () async {
+                      /*Firestore.instance
                           .collection("demo")
                           .document("control")
                           .get()
@@ -1342,7 +1420,27 @@ class HomePageState extends State<HomePage>
                                 .updateData({"ts": tsList2});
                           });
                         }
+                      });*/
+
+                      // DEMO: Hardware-interfacing code has been replaced with simulation code
+                      setState(() {
+                        isOff = !isOff;
+                        isOffMaster = !isOffMaster;
                       });
+
+                      colorTweenG1 = ColorTween(
+                              begin: colorTweenG1.value,
+                              end: isOff
+                                  ? Colors.grey[400]
+                                  : cprefs < 20
+                                      ? Colors.blue[100]
+                                      : Colors.greenAccent)
+                          .animate(colorControllerG1);
+
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setBool("isOffMaster", isOffMaster);
+                      prefs.setBool("isOff", isOff);
                     },
                   )
                 ],
@@ -1483,14 +1581,15 @@ class HomePageState extends State<HomePage>
                                                 style: TextStyle(fontSize: 18),
                                               ),
                                               onPressed: () {
-                                                if (maxtemp1 <= top) {
+                                                /*if (maxtemp1 <= top) {
                                                   Firestore.instance
                                                       .collection("demo")
                                                       .document("prefs")
                                                       .updateData(
                                                           {"max": maxtemp1});
                                                   dynamicTemp();
-                                                }
+                                                }*/
+
                                                 Navigator.pop(context);
                                               },
                                             ),
@@ -1597,14 +1696,15 @@ class HomePageState extends State<HomePage>
                                               style: TextStyle(fontSize: 18),
                                             ),
                                             onPressed: () {
-                                              if (mintemp1 < maxtemp) {
+                                              /*if (mintemp1 < maxtemp) {
                                                 Firestore.instance
                                                     .collection("demo")
                                                     .document("prefs")
                                                     .updateData(
                                                         {"min": mintemp1});
                                                 dynamicTemp();
-                                              }
+                                              }*/
+
                                               Navigator.pop(context);
                                             },
                                           ),
@@ -1646,7 +1746,8 @@ class HomePageState extends State<HomePage>
                       setState(() {
                         confPowerComplete = false;
                       });
-                      Firestore.instance
+
+                      /*Firestore.instance
                           .collection("demo")
                           .document("control")
                           .updateData({
@@ -1673,7 +1774,7 @@ class HomePageState extends State<HomePage>
                             .updateData({
                           "signalReceived": false,
                         });
-                      });
+                      });*/
 
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) => Setup1()));
@@ -1685,7 +1786,7 @@ class HomePageState extends State<HomePage>
                       "About Ambient",
                     ),
                     subtitle: Text(
-                      "Updated to 1.0-RDE",
+                      "Updated to 1.0-UIDemo",
                     ),
                   ),
                   ListTile(
@@ -1725,7 +1826,8 @@ class HomePageState extends State<HomePage>
                       prefs.setInt("top", 35);
                       prefs.setInt("bottom", 10);
                       prefs.setBool("autoOff", false);
-                      Firestore.instance
+
+                      /*Firestore.instance
                           .collection("demo")
                           .document("control")
                           .get()
@@ -1777,7 +1879,20 @@ class HomePageState extends State<HomePage>
                               .document("stats")
                               .updateData({"ts": tsList2});
                         });
-                      });
+                      });*/
+
+                      // DEMO: Hardware-interfacing code has been replaced with simulation code
+                      colorTweenG1 = ColorTween(
+                              begin: colorTweenG1.value,
+                              end: isOff
+                                  ? Colors.grey[400]
+                                  : cprefs < 20
+                                      ? Colors.blue[100]
+                                      : Colors.greenAccent)
+                          .animate(colorControllerG1);
+                      prefs.setBool("isOffMaster", isOffMaster);
+                      prefs.setBool("isOff", isOff);
+
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(builder: (context) => Setup1()),
@@ -1843,7 +1958,9 @@ class HomePageState extends State<HomePage>
                     selectedColor: isOff
                         ? Colors.grey[600]
                         : cprefs < 28
-                            ? cprefs < 20 ? Colors.blue[300] : Colors.green[300]
+                            ? cprefs < 20
+                                ? Colors.blue[300]
+                                : Colors.green[300]
                             : Colors.redAccent,
                     unselectedColor: Colors.white,
                     borderRadius: 32.0,
@@ -1943,14 +2060,15 @@ class HomePageState extends State<HomePage>
                                             prefs.setBool("isDynamic", Dynamic);
                                             prefs.setInt("preftemp", preftemp);
                                           }
-                                          Firestore.instance
+
+                                          /*Firestore.instance
                                               .collection("demo")
                                               .document("prefs")
                                               .updateData({
                                             "isDynamic": Dynamic,
                                             "preferred": cprefs
                                           });
-                                          dynamicTemp();
+                                          dynamicTemp();*/
                                         }),
                                     onLongPress: () {
                                       var preftemp1 = preftemp;
@@ -1973,31 +2091,40 @@ class HomePageState extends State<HomePage>
                                                     children: [
                                                       Container(height: 25),
                                                       SliderTheme(
-                                                        data: SliderTheme.of(context).copyWith(
-                                                            thumbColor: preftemp1 < 28
-                                                                ? preftemp1 < 20
-                                                                    ? Colors.blue[
-                                                                        200]
-                                                                    : Colors.green[
-                                                                        200]
-                                                                : Colors
-                                                                    .red[200],
-                                                            activeTrackColor: preftemp1 < 28
-                                                                ? preftemp1 < 20
-                                                                    ? Colors.blue[
-                                                                        300]
-                                                                    : Colors.green[
-                                                                        300]
-                                                                : Colors
-                                                                    .redAccent,
-                                                            activeTickMarkColor: preftemp1 < 20
-                                                                ? Colors
-                                                                    .blue[300]
-                                                                : Colors
-                                                                    .green[300],
-                                                            inactiveTickMarkColor:
-                                                                Colors.grey[200],
-                                                            inactiveTrackColor: Colors.grey[200]),
+                                                        data: SliderTheme.of(context)
+                                                            .copyWith(
+                                                                thumbColor: preftemp1 <
+                                                                        28
+                                                                    ? preftemp1 <
+                                                                            20
+                                                                        ? Colors.blue[
+                                                                            200]
+                                                                        : Colors.green[
+                                                                            200]
+                                                                    : Colors.red[
+                                                                        200],
+                                                                activeTrackColor: preftemp1 <
+                                                                        28
+                                                                    ? preftemp1 <
+                                                                            20
+                                                                        ? Colors.blue[
+                                                                            300]
+                                                                        : Colors.green[
+                                                                            300]
+                                                                    : Colors
+                                                                        .redAccent,
+                                                                activeTickMarkColor:
+                                                                    preftemp1 < 20
+                                                                        ? Colors.blue[
+                                                                            300]
+                                                                        : Colors.green[
+                                                                            300],
+                                                                inactiveTickMarkColor:
+                                                                    Colors.grey[
+                                                                        200],
+                                                                inactiveTrackColor:
+                                                                    Colors
+                                                                        .grey[200]),
                                                         child: Slider(
                                                           value: ((((preftemp1) -
                                                                       bottom) /
@@ -2055,7 +2182,8 @@ class HomePageState extends State<HomePage>
                                                                     prefs =
                                                                     await SharedPreferences
                                                                         .getInstance();
-                                                                Firestore
+
+                                                                /*Firestore
                                                                     .instance
                                                                     .collection(
                                                                         "demo")
@@ -2064,7 +2192,8 @@ class HomePageState extends State<HomePage>
                                                                     .updateData({
                                                                   "preferred":
                                                                       preftemp1
-                                                                });
+                                                                });*/
+
                                                                 setState(() {
                                                                   preftemp =
                                                                       temporaryTemp;
@@ -2151,7 +2280,7 @@ class HomePageState extends State<HomePage>
                                                                   ),
                                                                   onPressed:
                                                                       () async {
-                                                                    Firestore
+                                                                    /*Firestore
                                                                         .instance
                                                                         .collection(
                                                                             "demo")
@@ -2160,13 +2289,13 @@ class HomePageState extends State<HomePage>
                                                                         .updateData({
                                                                       "prev":
                                                                           cprefs
-                                                                    });
+                                                                    });*/
                                                                     setState(
                                                                         () {
                                                                       cprefs =
                                                                           25;
                                                                     });
-                                                                    Firestore
+                                                                    /*Firestore
                                                                         .instance
                                                                         .collection(
                                                                             "demo")
@@ -2185,7 +2314,7 @@ class HomePageState extends State<HomePage>
                                                                         .updateData({
                                                                       "adj":
                                                                           true,
-                                                                    });
+                                                                    });*/
                                                                     if (isOff) {
                                                                       setState(
                                                                           () {
@@ -2194,7 +2323,7 @@ class HomePageState extends State<HomePage>
                                                                         isOffMaster =
                                                                             false;
                                                                       });
-                                                                      Firestore
+                                                                      /*Firestore
                                                                           .instance
                                                                           .collection(
                                                                               "demo")
@@ -2217,7 +2346,7 @@ class HomePageState extends State<HomePage>
                                                                             true,
                                                                         "poweroff":
                                                                             false,
-                                                                      });
+                                                                      });*/
 
                                                                       SharedPreferences
                                                                           prefs =
@@ -2225,7 +2354,11 @@ class HomePageState extends State<HomePage>
                                                                               .getInstance();
                                                                       colorTweenG1 = ColorTween(
                                                                               begin: colorTweenG1.value,
-                                                                              end: isOff ? Colors.grey[400] : cprefs < 20 ? Colors.blue[100] : Colors.greenAccent)
+                                                                              end: isOff
+                                                                                  ? Colors.grey[400]
+                                                                                  : cprefs < 20
+                                                                                      ? Colors.blue[100]
+                                                                                      : Colors.greenAccent)
                                                                           .animate(colorControllerG1);
                                                                       prefs.setBool(
                                                                           "isOff",
@@ -2233,7 +2366,7 @@ class HomePageState extends State<HomePage>
                                                                       prefs.setBool(
                                                                           "isOffMaster",
                                                                           isOffMaster);
-                                                                      Firestore
+                                                                      /*Firestore
                                                                           .instance
                                                                           .collection(
                                                                               "demo")
@@ -2272,14 +2405,14 @@ class HomePageState extends State<HomePage>
                                                                           "ts":
                                                                               tsList2
                                                                         });
-                                                                      });
+                                                                      });*/
                                                                     }
                                                                     if (Dynamic) {
                                                                       SharedPreferences
                                                                           prefs =
                                                                           await SharedPreferences
                                                                               .getInstance();
-                                                                      Firestore
+                                                                      /*Firestore
                                                                           .instance
                                                                           .collection(
                                                                               "demo")
@@ -2288,7 +2421,7 @@ class HomePageState extends State<HomePage>
                                                                           .updateData({
                                                                         "preferred":
                                                                             25
-                                                                      });
+                                                                      });*/
                                                                       setState(
                                                                           () {
                                                                         preftemp =
@@ -2316,14 +2449,22 @@ class HomePageState extends State<HomePage>
                                                     );
                                                   });
                                             } else {
-                                              Firestore.instance
+                                              // DEMO: Hardware-interfacing code has been replaced with simulation code
+                                              SharedPreferences prefs =
+                                                  await SharedPreferences
+                                                      .getInstance();
+
+                                              /*Firestore.instance
                                                   .collection("demo")
                                                   .document("prefs")
-                                                  .updateData({"prev": cprefs});
+                                                  .updateData({"prev": cprefs});*/
+
                                               setState(() {
                                                 cprefs = 25;
                                               });
-                                              Firestore.instance
+                                              await prefs.setInt(
+                                                  "cprefs", cprefs);
+                                              /*Firestore.instance
                                                   .collection("demo")
                                                   .document("prefs")
                                                   .updateData({"prefs": 25});
@@ -2332,13 +2473,13 @@ class HomePageState extends State<HomePage>
                                                   .document("control")
                                                   .updateData({
                                                 "adj": true,
-                                              });
+                                              });*/
                                               if (isOff) {
                                                 setState(() {
                                                   isOff = false;
                                                   isOffMaster = false;
                                                 });
-                                                Firestore.instance
+                                                /*Firestore.instance
                                                     .collection("demo")
                                                     .document("prefs")
                                                     .updateData({
@@ -2351,11 +2492,8 @@ class HomePageState extends State<HomePage>
                                                     .updateData({
                                                   "poweron": true,
                                                   "poweroff": false,
-                                                });
+                                                });*/
 
-                                                SharedPreferences prefs =
-                                                    await SharedPreferences
-                                                        .getInstance();
                                                 colorTweenG1 = ColorTween(
                                                         begin:
                                                             colorTweenG1.value,
@@ -2370,7 +2508,7 @@ class HomePageState extends State<HomePage>
                                                 prefs.setBool("isOff", isOff);
                                                 prefs.setBool(
                                                     "isOffMaster", isOffMaster);
-                                                Firestore.instance
+                                                /*Firestore.instance
                                                     .collection("demo")
                                                     .document("stats")
                                                     .get()
@@ -2393,17 +2531,17 @@ class HomePageState extends State<HomePage>
                                                       .document("stats")
                                                       .updateData(
                                                           {"ts": tsList2});
-                                                });
+                                                });*/
                                               }
                                               if (Dynamic) {
                                                 SharedPreferences prefs =
                                                     await SharedPreferences
                                                         .getInstance();
-                                                Firestore.instance
+                                                /* Firestore.instance
                                                     .collection("demo")
                                                     .document("prefs")
                                                     .updateData(
-                                                        {"preferred": 25});
+                                                        {"preferred": 25});*/
                                                 setState(() {
                                                   preftemp = 25;
                                                 });
@@ -2534,7 +2672,7 @@ class HomePageState extends State<HomePage>
                                                                           18),
                                                                 ),
                                                                 onPressed: () {
-                                                                  if (mintemp1 <
+                                                                  /*if (mintemp1 <
                                                                       maxtemp) {
                                                                     Firestore
                                                                         .instance
@@ -2547,7 +2685,7 @@ class HomePageState extends State<HomePage>
                                                                           mintemp1
                                                                     });
                                                                     dynamicTemp();
-                                                                  }
+                                                                  }*/
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
