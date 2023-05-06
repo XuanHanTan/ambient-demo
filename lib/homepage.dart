@@ -413,7 +413,7 @@ class HomePageState extends State<HomePage>
         hours = 8760;
       });
     }
-    statlistener = Firestore.instance
+    /*statlistener = Firestore.instance
         .collection("demo")
         .document("stats")
         .snapshots()
@@ -522,6 +522,125 @@ class HomePageState extends State<HomePage>
           });
         });
       }
+    });*/
+
+    // DEMO: Hardware-interfacing code has been replaced with simulation code
+    DateTime now = DateTime.now();
+    final ts = [];
+    var subtractnum = 4;
+    var subhours = 180;
+    var tempIsOff = true;
+    for (var i = 0; i < 30; i++) {
+      subhours -= subtractnum;
+      final subtime = now.subtract(Duration(hours: subhours));
+      ts.add({
+        "time":
+            "${subtime.year}-${subtime.month.toString().padLeft(2, "0")}-${subtime.day.toString().padLeft(2, "0")} ${subtime.hour.toString().padLeft(2, "0")}:${subtime.minute.toString().padLeft(2, "0")}:${subtime.second.toString().padLeft(2, "0")}",
+        "off": tempIsOff
+      });
+      tempIsOff = !tempIsOff;
+      subtractnum = subtractnum == 4 ? 8 : 4;
+    }
+
+    List<List<Map>> sections = [];
+    setState(() {
+      sldatalist = [];
+      totalsavings = 0;
+    });
+    for (var i = 0; i <= hours - 1; i++) {
+      setState(() {
+        sldatalist.add(0.0);
+        sections.add([]);
+      });
+    }
+    ts.forEach((element) {
+      DateFormat time = DateFormat("yyyy-MM-dd hh:mm:ss");
+      DateTime tstime = time.parse(element["time"]);
+      if (now.difference(tstime.add(Duration(hours: timezone))).inHours <=
+          hours) {
+        setState(() {
+          sections[tstime
+                  .difference(now
+                      .subtract(Duration(hours: timezone))
+                      .subtract(Duration(hours: hours)))
+                  .inHours
+                  .round()]
+              .add(element);
+        });
+      }
+    });
+
+    DateTime prevSSection;
+    var prevSPower = 0.0;
+    var prevAdjPower = 0.0;
+    sections.asMap().forEach((key, element) {
+      element.forEach((element2) {
+        DateFormat time = DateFormat("yyyy-MM-dd hh:mm:ss");
+        DateTime tstime =
+            time.parse(element2["time"]).add(Duration(hours: timezone));
+        if (prevSSection != null) {
+          if (((tstime.difference(prevSSection).inSeconds / 3600) *
+                  prevSPower) >
+              750.0) {
+            print("more than 750Wh");
+            var rempower = ((tstime.difference(prevSSection).inSeconds / 3600) *
+                prevSPower);
+            print("rem $rempower key = $key");
+            for (var i = key; (i >= 0 && rempower > 0); i--) {
+              var curr = sldatalist[i];
+              setState(() {
+                sldatalist[i] = 750.0;
+              });
+              setState(() {
+                rempower -= 750.0 - curr;
+              });
+              print("rem $rempower key = $key");
+              if (rempower.isNegative) {
+                setState(() {
+                  sldatalist[i] = 750.0 - rempower.abs();
+                });
+              }
+              print(sldatalist);
+            }
+          } else {
+            setState(() {
+              sldatalist[key] = sldatalist[key] +
+                  (tstime.difference(prevSSection).inSeconds / 3600) *
+                      prevSPower;
+            });
+          }
+          print(prevSPower);
+          print(
+              (tstime.difference(prevSSection).inSeconds / 3600) * prevSPower);
+          print(prevSSection);
+        }
+        if (element2["off"] == true) {
+          setState(() {
+            prevSPower = 750.0;
+          });
+        } else {
+          if (element2["adj"] == true) {
+            setState(() {
+              prevSPower = (element2["diff"] * 137.5);
+              prevAdjPower = (element2["diff"] * 137.5);
+            });
+          } else {
+            setState(() {
+              prevSPower = 0.0;
+            });
+          }
+        }
+        setState(() {
+          prevSSection = DateTime(tstime.year, tstime.month, tstime.day,
+              tstime.hour, tstime.minute, tstime.second);
+        });
+      });
+    });
+    print(sldatalist);
+    sldatalist.forEach((element) {
+      setState(() {
+        totalsavings += element;
+      });
     });
   }
 
@@ -530,6 +649,35 @@ class HomePageState extends State<HomePage>
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return WillPopScope(
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25)),
+                title: Text("Important information"),
+                content: Text(
+                    "This build of Ambient has had all hardware-interfacing components removed, so as to allow the testing of the Ambient App UI without the Ambient Remote. This build is only a demo version and will not communicate with the server. We hope you will enjoy using Ambient!"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "I understand",
+                    ),
+                  ),
+                ],
+              ),
+              onWillPop: () => Future.value(false),
+            );
+          },
+          barrierDismissible: false);
+    });
+
     var rng = Random();
     setState(() {
       selTipIndex = rng.nextInt(3);
@@ -552,6 +700,7 @@ class HomePageState extends State<HomePage>
 
     // DEMO: Hardware-interfacing code has been replaced with simulation code
     adjustTempAnimate();
+    statlistener2(currentSelection);
 
     /*Firestore.instance.collection("demo").document("prefs").get().then((value) {
       setState(() {
@@ -1968,7 +2117,7 @@ class HomePageState extends State<HomePage>
                       setState(() {
                         currentSelection = index;
                       });
-                      statlistener.cancel();
+                      // statlistener.cancel();
                       statlistener2(currentSelection);
                     },
                   ),
