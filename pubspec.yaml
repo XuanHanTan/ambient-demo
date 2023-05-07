@@ -37,6 +37,7 @@ dependencies:
   intl:
   material_segmented_control:
   flutter_swiper:
+  # cloud_firestore:
 
 dev_dependencies:
   flutter_test:
