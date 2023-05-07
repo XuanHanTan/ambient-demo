@@ -29,7 +29,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.3
   auto_size_text:
-  cloud_firestore:
   shared_preferences:
   percent_indicator:
   background_fetch:

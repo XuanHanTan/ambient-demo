@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:ambient/setup1.dart';
 import 'package:background_fetch/background_fetch.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -49,7 +49,7 @@ var isOff = true;
 var autoOffEnabled = false;
 var isOffMaster = true;
 var currentSelection = 0;
-StreamSubscription<DocumentSnapshot> statlistener;
+// StreamSubscription<DocumentSnapshot> statlistener;
 var tiplist = [
   {
     "content":
@@ -73,7 +73,7 @@ class HomePageState extends State<HomePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   dynamicTemp() async {
-    Firestore.instance
+    /*Firestore.instance
         .collection("demo")
         .document("prefs")
         .get()
@@ -388,7 +388,7 @@ class HomePageState extends State<HomePage>
           });
         }
       }
-    });
+    });*/
   }
 
   @override
@@ -526,13 +526,14 @@ class HomePageState extends State<HomePage>
 
     // DEMO: Hardware-interfacing code has been replaced with simulation code
     DateTime now = DateTime.now();
+    DateTime nowUTC = DateTime.now().toUtc();
     final ts = [];
     var subtractnum = 4;
     var subhours = 180;
     var tempIsOff = true;
     for (var i = 0; i < 30; i++) {
       subhours -= subtractnum;
-      final subtime = now.subtract(Duration(hours: subhours));
+      final subtime = nowUTC.subtract(Duration(hours: subhours));
       ts.add({
         "time":
             "${subtime.year}-${subtime.month.toString().padLeft(2, "0")}-${subtime.day.toString().padLeft(2, "0")} ${subtime.hour.toString().padLeft(2, "0")}:${subtime.minute.toString().padLeft(2, "0")}:${subtime.second.toString().padLeft(2, "0")}",

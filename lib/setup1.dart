@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import './homepage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +22,7 @@ var bottom = 10;
 var comingFromFinishSU = false;
 BuildContext context2;
 TextEditingController controller3;
-StreamSubscription<DocumentSnapshot> streamSub;
+// StreamSubscription<DocumentSnapshot> streamSub;
 PageController controller;
 
 class Setup1State extends State<Setup1> with WidgetsBindingObserver {
